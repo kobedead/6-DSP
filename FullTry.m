@@ -1,4 +1,4 @@
-%First we need to filter the data to reduce noice.
+    %First we need to filter the data to reduce noice.
 %For this we can use a low-pass Butterworth filter with zero-phase
 %distortion (filtfilt function) with good cutoff freq -> need to search
 %explaination
