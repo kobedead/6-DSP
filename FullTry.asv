@@ -52,15 +52,6 @@ kneeL_angles_deg = zeros(nRows, 3);
 % Store missing data for all frames
 all_missing_data = struct(); 
 
-% Calculate the average jump size
-avg_jump = calculateAverageJumpSize(T_filt);
-disp(['Average jump size in the data: ' num2str(avg_jump)]);
-
-% Now you can use avg_jump to set your allowed_jump_threshold
-allowed_jump_threshold = avg_jump * 5;  % Tweak this parameter
-disp(['Jump threshold set to: ' num2str(allowed_jump_threshold)]);
-
-
 
 % LOOP THROUGH FRAMES 
 for i = 1:nRows
@@ -86,19 +77,10 @@ for i = 1:nRows
 
     % Test invalid data
 
-    % Check whether this frame has missing marker data (0 values)
-    missing_data_info = findMissingMarkerData(T_filt, i, allowed_jump_threshold);
+    % Check whether this frame have missing marker data (0 values)
+    missing_data_info = findMissingMarkerData(T_filt, i);
     if ~isempty(fieldnames(missing_data_info))
-        if ~isfield(all_missing_data, ['frame_' num2str(i)])
-            all_missing_data.(['frame_' num2str(i)]) = struct();
-        end
-        % Merge missing_data_info into all_missing_data for the current frame
-        current_frame_data = all_missing_data.(['frame_' num2str(i)]);
-        fields_to_add = fieldnames(missing_data_info);
-        for f = 1:length(fields_to_add)
-            current_frame_data.(fields_to_add{f}) = missing_data_info.(fields_to_add{f});
-        end
-        all_missing_data.(['frame_' num2str(i)]) = current_frame_data;
+        all_missing_data.(['frame_' num2str(i)]) = missing_data_info;
     end
 
 
@@ -272,29 +254,19 @@ end
 % Prints out for which body parts at what frame missing marker data 
 % was found. Uses a custom function called frames_with_missing_data
 
-disp('Missing Data Summary (including big jumps):');
-if exist('all_missing_data', 'var') == 1
-    frames_with_missing_data = fieldnames(all_missing_data);
-    if isempty(frames_with_missing_data)
-        disp('No missing data (0-valued or big jumps) found in any frame.');
-    else
-        for k = 1:length(frames_with_missing_data)
-            frame_name = frames_with_missing_data{k};
-            frame_number = str2double(frame_name(7:end)); % Extract frame number
-            missing_info = all_missing_data.(frame_name);
-            missing_markers = fieldnames(missing_info);
-            if ~isempty(missing_markers)
-                fprintf('Frame %d: ', frame_number);
-                for m = 1:length(missing_markers)
-                    marker_problem = missing_markers{m};
-                    fprintf('%s ', marker_problem);
-                end
-                fprintf('\n');
-            end
-        end
-    end
+disp('Missing Data Summary:');
+frames_with_missing_data = fieldnames(all_missing_data);
+if isempty(frames_with_missing_data)
+    disp('No missing data found in any frame.');
 else
-    disp('Error: all_missing_data was not created. Missing data detection may have failed.');
+    for k = 1:length(frames_with_missing_data)
+        frame_name = frames_with_missing_data{k};
+        frame_number = str2double(frame_name(7:end)); % Extract frame number
+        missing_markers = fieldnames(all_missing_data.(frame_name));
+        fprintf('Frame %d: Missing data for markers - ', frame_number);
+        fprintf('%s ', missing_markers{:});
+        fprintf('\n');
+    end
 end
 
 
