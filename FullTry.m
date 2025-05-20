@@ -1,5 +1,12 @@
-t = readtable("10Ax1.tsv", "FileType","text",'Delimiter', '\t');
-% Extract data
+t = readtable("10Ax1.tsv", "FileType", "text", 'Delimiter', '\t');
+data = table2array(t);
+upsampling_factor = 2;  % Upsampling factor
+nOriginal = size(data, 1);
+xOriginal = 1:nOriginal;
+xInterp = linspace(1, nOriginal, nOriginal * upsampling_factor);
+dataInterp = interp1(xOriginal, data, xInterp, 'spline');
+t = array2table(dataInterp, 'VariableNames', t.Properties.VariableNames);
+    
 data = t{:,:};
 [nRows, nCols] = size(data);
 
@@ -57,9 +64,8 @@ avg_jump = calculateAverageJumpSize(T_filt);
 disp(['Average jump size in the data: ' num2str(avg_jump)]);
 
 % Now you can use avg_jump to set your allowed_jump_threshold
-allowed_jump_threshold = avg_jump * 5;  % Tweak this parameter
+allowed_jump_threshold = avg_jump * 5 * upsampling_factor;  % Tweak this parameter
 disp(['Jump threshold set to: ' num2str(allowed_jump_threshold)]);
-
 
 
 % LOOP THROUGH FRAMES 
@@ -498,6 +504,186 @@ title('CRP: Shoulder (Plane of Elev) vs Elbow (Flex/Ext)');
 xlabel('Time (s)');
 ylabel('CRP (degrees)');
 grid on;
+
+
+% --- 9. TIME POINTS ---
+% Calculate time points
+% 1. Foot contact left leg (FC)
+% 2. Ball release (BR)
+% 3. Maximal external rotation of the right shoulder (MER)
+
+% 1. Foot contact left leg (FC)
+avgMMLX = mean(T_filt.MMLX(200:end));
+
+xMMLX = T_filt.MMLX(200:end); % x pos of MMLX after frame 200
+v_xMMLX = gradient(xMMLX, dt); % Velocity
+ax_xMMLX = gradient(v_xMMLX, dt); % Acceleration
+
+vx_smooth = smoothdata(v_xMMLX, 'movmean', 5); % Smoothing velocity
+ax_smooth = smoothdata(ax_xMMLX, 'movmean', 5); % Smoothing accel
+
+[~, idx_min_acc] = min(ax_smooth); % min acceleration
+
+% Map back to original frame index
+frame_contact = 199 + idx_min_acc;  % because xMMLX starts at frame 200
+
+% Also identify peak velocity for comparison (optional)
+[~, idx_peak_v] = max(vx_smooth);
+frame_peak_velocity = 199 + idx_peak_v;
+
+% 2. Ball release (BR)
+frame_FC = frame_contact;
+
+% Extract PLR components from FC onward
+PLR = [T_filt.PLRX(frame_FC:end), T_filt.PLRY(frame_FC:end), T_filt.PLRZ(frame_FC:end)];
+
+% Compute velocity in each direction
+v_PLR = gradient(PLR, dt);  % rows: frames, cols: X/Y/Z
+
+% Compute magnitude of 3D velocity
+v_PLR_mag = sqrt(sum(v_PLR.^2, 2));
+
+% Smooth velocity magnitude (optional)
+v_PLR_mag_smooth = smoothdata(v_PLR_mag, 'movmean', 5);
+
+% Find peak velocity (ball release)
+[~, idx_BR] = max(v_PLR_mag_smooth);
+frame_BR = frame_FC - 1 + idx_BR;  % map to global frame index
+
+% Full PLR data for plotting
+PLR_full = [T_filt.PLRX, T_filt.PLRY, T_filt.PLRZ];
+v_full = gradient(PLR_full, dt);
+a_full = gradient(v_full, dt);
+
+v_mag_full = sqrt(sum(v_full.^2, 2));
+a_mag_full = sqrt(sum(a_full.^2, 2));
+
+
+% 3. Maximal external rotation of the right shoulder (MER)
+axial_rotation = shoulder_angles_deg(frame_FC:end, 3);  % external/internal rotation
+
+[max_ext_rot, idx_max_rot] = max(axial_rotation); % Max rotation (peak angle)
+
+frame_MER = frame_FC - 1 + idx_max_rot;
+
+% -------------------------------
+% Timeline Visualization
+% -------------------------------
+
+% Unified Timeline Visualization + Kinematics Verification
+t_rel = ((1:height(T_filt)) - frame_MER) / fs;
+x_limits = [-2, 2];
+
+figure('Name','Kinematic Overview - Aligned to MER', 'NumberTitle','off');
+
+% --- Subplot 1: Left Malleoli Acceleration (X) ---
+subplot(3,2,1);  % 3 rows, 2 cols
+plot(t_rel(200:end), ax_smooth, 'k');
+hold on;
+xline((frame_FC - frame_MER)/fs, '--r');
+xline(0, '--m');
+xline((frame_BR - frame_MER)/fs, '--g');
+text((frame_FC - frame_MER)/fs, max(ax_smooth)*1.05, 'FC', 'Color','r', 'HorizontalAlignment','center');
+text(0, max(ax_smooth)*1.05, 'MER', 'Color','m', 'HorizontalAlignment','center');
+text((frame_BR - frame_MER)/fs, max(ax_smooth)*1.05, 'BR', 'Color','g', 'HorizontalAlignment','center');
+ylabel('Acc. (m/s²)');
+title('Left Malleoli Acceleration');
+xlim(x_limits)
+grid on;
+
+% --- Subplot 2: PLR Velocity Magnitude ---
+subplot(3,2,2);
+plot(t_rel, v_mag_full, 'b');
+hold on;
+xline((frame_FC - frame_MER)/fs, '--r');
+xline(0, '--m');
+xline((frame_BR - frame_MER)/fs, '--g');
+text((frame_FC - frame_MER)/fs, max(v_mag_full)*1.05, 'FC', 'Color','r', 'HorizontalAlignment','center');
+text(0, max(v_mag_full)*1.05, 'MER', 'Color','m', 'HorizontalAlignment','center');
+text((frame_BR - frame_MER)/fs, max(v_mag_full)*1.05, 'BR', 'Color','g', 'HorizontalAlignment','center');
+ylabel('Velocity (m/s)');
+title('PLR Velocity Magnitude');
+xlim(x_limits)
+grid on;
+
+% --- Subplot 3: Shoulder Axial Rotation ---
+subplot(3,2,3);
+plot(t_rel, shoulder_angles_deg(:,3), 'b');
+hold on;
+xline((frame_FC - frame_MER)/fs, '--r');
+xline(0, '--m');
+xline((frame_BR - frame_MER)/fs, '--g');
+ylabel('Angle (°)');
+title('Shoulder Axial Rotation');
+xlim(x_limits)
+grid on;
+
+% --- Subplot 4: PLR X/Y/Z Position ---
+subplot(3,2,4);
+plot(t_rel, PLR_full);
+hold on;
+xline((frame_FC - frame_MER)/fs, '--r');
+xline(0, '--m');
+xline((frame_BR - frame_MER)/fs, '--g');
+legend('X','Y','Z');
+title('PLR Position ');
+ylabel('Position (m)');
+xlim(x_limits)
+grid on;
+
+% --- Subplot 5: PLR Velocity X/Y/Z ---
+subplot(3,2,5);
+plot(t_rel, v_full);
+hold on;
+xline((frame_FC - frame_MER)/fs, '--r');
+xline(0, '--m');
+xline((frame_BR - frame_MER)/fs, '--g');
+legend('Vx','Vy','Vz');
+ylabel('Velocity (m/s)');
+title('PLR Velocity Components');
+xlim(x_limits)
+grid on;
+
+% --- Subplot 6: PLR Acceleration X/Y/Z ---
+subplot(3,2,6);
+plot(t_rel, a_full);
+hold on;
+xline((frame_FC - frame_MER)/fs, '--r');
+xline(0, '--m');
+xline((frame_BR - frame_MER)/fs, '--g');
+legend('Ax','Ay','Az');
+ylabel('Accel (m/s²)');
+xlabel('Time from MER (s)');
+title('PLR Acceleration Components');
+xlim(x_limits)
+grid on;
+
+% --- 3D graph of PLR trajectory ---
+figure('Name','PLR 3D Trajectory', 'NumberTitle','off');
+plot3(PLR_full(:,1), PLR_full(:,2), PLR_full(:,3), 'b');
+hold on;
+plot3(PLR_full(frame_FC,1), PLR_full(frame_FC,2), PLR_full(frame_FC,3), 'ro', 'DisplayName','Foot Contact');
+plot3(PLR_full(frame_BR,1), PLR_full(frame_BR,2), PLR_full(frame_BR,3), 'go', 'DisplayName','Ball Release');
+xlabel('X'); ylabel('Y'); zlabel('Z');
+title('PLR Marker 3D Trajectory');
+legend;
+grid on;
+axis equal;
+view(3);
+rotate3d on;
+
+
+
+
+
+% Summary of time points
+disp(['--- Time points ---'])
+disp(['The left foot contacted the ground at frame: ' num2str(frame_FC / upsampling_factor)]);
+disp(['The ball was released at frame: ' num2str(frame_BR / upsampling_factor)]);
+disp(['Maximum external/internal rotation at frame: ' num2str(frame_MER / upsampling_factor)])
+
+
+
 
 
 
