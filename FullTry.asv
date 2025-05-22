@@ -576,9 +576,9 @@ x_limits = [-2, 2];
 
 figure('Name','Kinematic Overview - Aligned to MER', 'NumberTitle','off');
 
-% --- Subplot 1: Left Malleoli Acceleration (X) ---
+% --- Subplot 1: Left Malleoli  (X) ---
 subplot(3,2,1);  % 3 rows, 2 cols
-plot(t_rel(200:end), ax_smooth, 'k');
+plot(t_rel(200:end), xMMLX, 'k');
 hold on;
 xline((frame_FC - frame_MER)/fs, '--r');
 xline(0, '--m');
@@ -586,11 +586,48 @@ xline((frame_BR - frame_MER)/fs, '--g');
 text((frame_FC - frame_MER)/fs, max(ax_smooth)*1.05, 'FC', 'Color','r', 'HorizontalAlignment','center');
 text(0, max(ax_smooth)*1.05, 'MER', 'Color','m', 'HorizontalAlignment','center');
 text((frame_BR - frame_MER)/fs, max(ax_smooth)*1.05, 'BR', 'Color','g', 'HorizontalAlignment','center');
-ylabel('Acc. (m/s²)');
-hTitle = title('Left Malleoli Acceleration');
-pos = get(hTitle, 'Position');   % [x, y, z]
-pos(2) = pos(2) + 0.1;           % move title up by 0.1 units (adjust as needed)
-set(hTitle, 'Position', pos);
+ylabel('Position (u)');
+title('X Position of Left Malleoli');
+xlim(x_limits)
+grid on;
+
+% --- Subplot 2: Left Malleoli Velocity (X) ---
+subplot(3,2,3);  % 3 rows, 2 cols
+plot(t_rel(200:end), vx_smooth, 'k');
+hold on;
+xline((frame_FC - frame_MER)/fs, '--r');
+xline(0, '--m');
+xline((frame_BR - frame_MER)/fs, '--g');
+ylabel('Vel. (u/s)');
+title('Left Malleoli Acceleration');
+xlim(x_limits)
+grid on;
+
+% --- Subplot 3: Left Malleoli Acceleration (X) ---
+subplot(3,2,5);  % 3 rows, 2 cols
+plot(t_rel(200:end), ax_smooth, 'k');
+hold on;
+xline((frame_FC - frame_MER)/fs, '--r');
+xline(0, '--m');
+xline((frame_BR - frame_MER)/fs, '--g');
+ylabel('Acc. (u/s²)');
+title('Left Malleoli Acceleration');
+xlim(x_limits)
+grid on;
+
+% --- Subplot 4: PLR X Position ---
+subplot(3,2,2);
+plot(t_rel, T_filt.PLRX);
+hold on;
+xline((frame_FC - frame_MER)/fs, '--r');
+xline(0, '--m');
+xline((frame_BR - frame_MER)/fs, '--g');
+text((frame_FC - frame_MER)/fs, max(v_mag_full)*1.05, 'FC', 'Color','r', 'HorizontalAlignment','center');
+text(0, max(v_mag_full)*1.05, 'MER', 'Color','m', 'HorizontalAlignment','center');
+text((frame_BR - frame_MER)/fs, max(v_mag_full)*1.05, 'BR', 'Color','g', 'HorizontalAlignment','center');
+legend('X','Y','Z');
+title('PLR x Position ');
+ylabel('Position (u)');
 xlim(x_limits)
 grid on;
 
@@ -605,8 +642,7 @@ text((frame_FC - frame_MER)/fs, max(v_mag_full)*1.05, 'FC', 'Color','r', 'Horizo
 text(0, max(v_mag_full)*1.05, 'MER', 'Color','m', 'HorizontalAlignment','center');
 text((frame_BR - frame_MER)/fs, max(v_mag_full)*1.05, 'BR', 'Color','g', 'HorizontalAlignment','center');
 ylabel('Velocity (m/s)');
-title('PLR Velocity Magnitude')
-set(hTitle, 'Position', pos);
+title('PLR Velocity Magnitude');
 xlim(x_limits)
 grid on;
 
@@ -622,18 +658,7 @@ title('Shoulder Axial Rotation');
 xlim(x_limits)
 grid on;
 
-% --- Subplot 4: PLR X/Y/Z Position ---
-subplot(3,2,4);
-plot(t_rel, PLR_full);
-hold on;
-xline((frame_FC - frame_MER)/fs, '--r');
-xline(0, '--m');
-xline((frame_BR - frame_MER)/fs, '--g');
-legend('X','Y','Z');
-title('PLR Position ');
-ylabel('Position (m)');
-xlim(x_limits)
-grid on;
+
 
 % --- Subplot 5: PLR Velocity X/Y/Z ---
 subplot(3,2,5);
@@ -644,10 +669,7 @@ xline(0, '--m');
 xline((frame_BR - frame_MER)/fs, '--g');
 legend('Vx','Vy','Vz');
 ylabel('Velocity (m/s)');
-hTitle = title('PLR Velocity Components');
-pos = get(hTitle, 'Position');   % [x, y, z]
-pos(2) = pos(2) + 0.1;           % move title up by 0.1 units (adjust as needed)
-set(hTitle, 'Position', pos);
+title('PLR Velocity Components');
 xlim(x_limits)
 grid on;
 
@@ -661,10 +683,7 @@ xline((frame_BR - frame_MER)/fs, '--g');
 legend('Ax','Ay','Az');
 ylabel('Accel (m/s²)');
 xlabel('Time from MER (s)');
-hTitle = title('PLR Acceleration Components');
-pos = get(hTitle, 'Position');   % [x, y, z]
-pos(2) = pos(2) + 0.1;           % move title up by 0.1 units (adjust as needed)
-set(hTitle, 'Position', pos);
+title('PLR Acceleration Components');
 xlim(x_limits)
 grid on;
 
