@@ -679,9 +679,21 @@ rotate3d on;
 
 % Summary of time points
 disp(['--- Time points ---'])
-disp(['The left foot contacted the ground at frame: ' num2str(frame_FC / upsampling_factor)]);
-disp(['The ball was released at frame: ' num2str(frame_BR / upsampling_factor)]);
-disp(['Maximum external/internal rotation at frame: ' num2str(frame_MER / upsampling_factor)])
+
+time_FC = frame_FC / upsampling_factor / fs;
+time_MER = frame_MER / upsampling_factor / fs;
+time_BR = frame_BR / upsampling_factor / fs;
+
+disp(['The left foot contacted the ground at frame: ' num2str(frame_FC / upsampling_factor) ...
+      ' (Time: ' num2str(time_FC, '%.3f') ' s)']);
+
+disp(['Maximum external rotation occurred at frame: ' num2str(frame_MER / upsampling_factor) ...
+      ' (Time: ' num2str(time_MER, '%.3f') ' s)']);
+
+disp(['The ball was released at frame: ' num2str(frame_BR / upsampling_factor) ...
+      ' (Time: ' num2str(time_BR, '%.3f') ' s)']);
+
+
 
 
 

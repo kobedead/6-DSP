@@ -562,7 +562,9 @@ a_mag_full = sqrt(sum(a_full.^2, 2));
 % 3. Maximal external rotation of the right shoulder (MER)
 axial_rotation = shoulder_angles_deg(frame_FC:end, 3);  % external/internal rotation
 
-[max_ext_rot, idx_max_rot] = max(axial_rotation); % Max rotation (peak angle)
+% Min rotation shows maximum external rotation
+% Max rotation show maxmimum internal rotation
+[max_ext_rot, idx_max_rot] = min(axial_rotation);
 
 frame_MER = frame_FC - 1 + idx_max_rot;
 
@@ -572,118 +574,91 @@ frame_MER = frame_FC - 1 + idx_max_rot;
 
 % Unified Timeline Visualization + Kinematics Verification
 t_rel = ((1:height(T_filt)) - frame_MER) / fs;
-x_limits = [-2, 2];
+x_limits = [-nRows/fs, nRows/fs];
 
 figure('Name','Kinematic Overview - Aligned to MER', 'NumberTitle','off');
 
 % --- Subplot 1: Left Malleoli  (X) ---
-subplot(3,2,1);  % 3 rows, 2 cols
+subplot(4,2,1);
 plot(t_rel(200:end), xMMLX, 'k');
 hold on;
 xline((frame_FC - frame_MER)/fs, '--r');
 xline(0, '--m');
 xline((frame_BR - frame_MER)/fs, '--g');
-text((frame_FC - frame_MER)/fs, max(ax_smooth)*1.05, 'FC', 'Color','r', 'HorizontalAlignment','center');
-text(0, max(ax_smooth)*1.05, 'MER', 'Color','m', 'HorizontalAlignment','center');
-text((frame_BR - frame_MER)/fs, max(ax_smooth)*1.05, 'BR', 'Color','g', 'HorizontalAlignment','center');
-ylabel('Position (u)');
+text((frame_FC - frame_MER)/fs, max(xMMLX)*1.05, 'FC', 'Color','r', 'HorizontalAlignment','center');
+text(0, max(xMMLX)*1.05, 'MER', 'Color','m', 'HorizontalAlignment','center');
+text((frame_BR - frame_MER)/fs, max(xMMLX)*1.05, 'BR', 'Color','g', 'HorizontalAlignment','center');
+xlabel('Time (s)')
+ylabel('Position (mm)');
 title('X Position of Left Malleoli');
 xlim(x_limits)
 grid on;
 
 % --- Subplot 2: Left Malleoli Velocity (X) ---
-subplot(3,2,3);  % 3 rows, 2 cols
+subplot(4,2,3);
 plot(t_rel(200:end), vx_smooth, 'k');
 hold on;
 xline((frame_FC - frame_MER)/fs, '--r');
 xline(0, '--m');
 xline((frame_BR - frame_MER)/fs, '--g');
-ylabel('Vel. (u/s)');
-title('Left Malleoli Acceleration');
+xlabel('Time (s)')
+ylabel('Vel. (mm/s)');
+title('Left Malleoli Velocity');
 xlim(x_limits)
 grid on;
 
 % --- Subplot 3: Left Malleoli Acceleration (X) ---
-subplot(3,2,5);  % 3 rows, 2 cols
+subplot(4,2,5);
 plot(t_rel(200:end), ax_smooth, 'k');
 hold on;
 xline((frame_FC - frame_MER)/fs, '--r');
 xline(0, '--m');
 xline((frame_BR - frame_MER)/fs, '--g');
-ylabel('Acc. (u/s²)');
+xlabel('Time (s)')
+ylabel('Acc. (mm/s²)');
 title('Left Malleoli Acceleration');
 xlim(x_limits)
 grid on;
 
 % --- Subplot 4: PLR X Position ---
-subplot(3,2,2);
+subplot(4,2,2);
 plot(t_rel, T_filt.PLRX);
 hold on;
 xline((frame_FC - frame_MER)/fs, '--r');
 xline(0, '--m');
 xline((frame_BR - frame_MER)/fs, '--g');
-text((frame_FC - frame_MER)/fs, max(v_mag_full)*1.05, 'FC', 'Color','r', 'HorizontalAlignment','center');
-text(0, max(v_mag_full)*1.05, 'MER', 'Color','m', 'HorizontalAlignment','center');
-text((frame_BR - frame_MER)/fs, max(v_mag_full)*1.05, 'BR', 'Color','g', 'HorizontalAlignment','center');
-legend('X','Y','Z');
+text((frame_FC - frame_MER)/fs, max(T_filt.PLRX)*1.05, 'FC', 'Color','r', 'HorizontalAlignment','center');
+text(0, max(T_filt.PLRX)*1.05, 'MER', 'Color','m', 'HorizontalAlignment','center');
+text((frame_BR - frame_MER)/fs, max(T_filt.PLRX)*1.05, 'BR', 'Color','g', 'HorizontalAlignment','center');
 title('PLR x Position ');
-ylabel('Position (u)');
+xlabel('Time (s)')
+ylabel('Position (mm)');
 xlim(x_limits)
 grid on;
 
 % --- Subplot 2: PLR Velocity Magnitude ---
-subplot(3,2,2);
+subplot(4,2,4);
 plot(t_rel, v_mag_full, 'b');
 hold on;
 xline((frame_FC - frame_MER)/fs, '--r');
 xline(0, '--m');
 xline((frame_BR - frame_MER)/fs, '--g');
-text((frame_FC - frame_MER)/fs, max(v_mag_full)*1.05, 'FC', 'Color','r', 'HorizontalAlignment','center');
-text(0, max(v_mag_full)*1.05, 'MER', 'Color','m', 'HorizontalAlignment','center');
-text((frame_BR - frame_MER)/fs, max(v_mag_full)*1.05, 'BR', 'Color','g', 'HorizontalAlignment','center');
-ylabel('Velocity (m/s)');
+xlabel('Time (s)')
+ylabel('Velocity (mm/s)');
 title('PLR Velocity Magnitude');
 xlim(x_limits)
 grid on;
 
 % --- Subplot 3: Shoulder Axial Rotation ---
-subplot(3,2,3);
+subplot(4,2,6);
 plot(t_rel, shoulder_angles_deg(:,3), 'b');
 hold on;
 xline((frame_FC - frame_MER)/fs, '--r');
 xline(0, '--m');
 xline((frame_BR - frame_MER)/fs, '--g');
+xlabel('Time (s)')
 ylabel('Angle (°)');
 title('Shoulder Axial Rotation');
-xlim(x_limits)
-grid on;
-
-
-
-% --- Subplot 5: PLR Velocity X/Y/Z ---
-subplot(3,2,5);
-plot(t_rel, v_full);
-hold on;
-xline((frame_FC - frame_MER)/fs, '--r');
-xline(0, '--m');
-xline((frame_BR - frame_MER)/fs, '--g');
-legend('Vx','Vy','Vz');
-ylabel('Velocity (m/s)');
-title('PLR Velocity Components');
-xlim(x_limits)
-grid on;
-
-% --- Subplot 6: PLR Acceleration X/Y/Z ---
-subplot(3,2,6);
-plot(t_rel, a_full);
-hold on;
-xline((frame_FC - frame_MER)/fs, '--r');
-xline(0, '--m');
-xline((frame_BR - frame_MER)/fs, '--g');
-legend('Ax','Ay','Az');
-ylabel('Accel (m/s²)');
-xlabel('Time from MER (s)');
-title('PLR Acceleration Components');
 xlim(x_limits)
 grid on;
 
@@ -702,14 +677,23 @@ view(3);
 rotate3d on;
 
 
-
-
-
 % Summary of time points
 disp(['--- Time points ---'])
-disp(['The left foot contacted the ground at frame: ' num2str(frame_FC / upsampling_factor)]);
-disp(['The ball was released at frame: ' num2str(frame_BR / upsampling_factor)]);
-disp(['Maximum external/internal rotation at frame: ' num2str(frame_MER / upsampling_factor)])
+
+time_FC = frame_FC / fs;
+time_BR = frame_BR / fs;
+time_MER = frame_MER / fs;
+
+disp(['The left foot contacted the ground at frame: ' num2str(frame_FC / upsampling_factor) ...
+      ' (Time: ' num2str(time_FC, '%.3f') ' s)']);
+
+disp(['Maximum external rotation occurred at frame: ' num2str(frame_MER / upsampling_factor) ...
+      ' (Time: ' num2str(time_MER, '%.3f') ' s)']);
+
+disp(['The ball was released at frame: ' num2str(frame_BR / upsampling_factor) ...
+      ' (Time: ' num2str(time_BR, '%.3f') ' s)']);
+
+
 
 
 
