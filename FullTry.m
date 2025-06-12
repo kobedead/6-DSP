@@ -748,6 +748,103 @@ function updateMarker(frameIdx, angle_s, vel_s, timeVec, markerPt, infoText)
 end
 
 
+% --- Interactive Phase Plane: Thorax vs Pelvis (Flexion/Extension) ---
+
+% Extract thorax and pelvis flexion/extension angles (ZXY → 1st column = Flex/Ext)
+angle_tp = thorax_angles_deg(:,1);       % Thorax flex/ext
+vel_tp = thorax_velocities_deg_s(:,1);   % Thorax angular velocity
+
+% Time vector
+time_tp = (0:length(angle_tp)-1) / fs;
+
+% Initialize figure
+fig_tp = figure('Name','Interactive Phase Plane: Thorax vs Pelvis','NumberTitle','off');
+ax_tp = axes('Parent', fig_tp);
+plot(ax_tp, angle_tp, vel_tp, 'b.'); % Trajectory
+hold on;
+start_tp = plot(ax_tp, angle_tp(1), vel_tp(1), 'go', 'MarkerSize', 10, 'DisplayName', 'Start');
+end_tp = plot(ax_tp, angle_tp(end), vel_tp(end), 'ro', 'MarkerSize', 10, 'DisplayName', 'End');
+marker_tp = plot(ax_tp, angle_tp(1), vel_tp(1), 'ko', 'MarkerSize', 8, 'MarkerFaceColor','k');
+title(ax_tp, 'Thorax Angle-Velocity Phase Plane');
+xlabel(ax_tp, 'Angle (deg)');
+ylabel(ax_tp, 'Velocity (deg/s)');
+legend(ax_tp, 'Trajectory', 'Start', 'End', 'Selected Point');
+grid on;
+
+% Slider
+uicontrol('Style', 'text', 'String', 'Frame:', 'Position', [20, 20, 50, 20]);
+slider_tp = uicontrol('Style', 'slider',...
+    'Min',1,'Max',length(angle_tp),'Value',1,...
+    'Position', [70, 20, 300, 20],...
+    'SliderStep', [1/(length(angle_tp)-1) , 10/(length(angle_tp)-1)]);
+
+% Info Text
+infoText_tp = uicontrol('Style','text', 'Position', [380, 20, 300, 20], ...
+    'String', sprintf('t = %.2fs | Angle = %.1f° | Vel = %.1f°/s', time_tp(1), angle_tp(1), vel_tp(1)));
+
+% Callback function
+slider_tp.Callback = @(src,~) updateMarkerTP(round(src.Value), angle_tp, vel_tp, time_tp, marker_tp, infoText_tp);
+updateMarkerTP(1, angle_tp, vel_tp, time_tp, marker_tp, infoText_tp);
+
+% Callback definition
+function updateMarkerTP(frameIdx, angle_tp, vel_tp, time_tp, marker_tp, infoText_tp)
+    marker_tp.XData = angle_tp(frameIdx);
+    marker_tp.YData = vel_tp(frameIdx);
+    infoText_tp.String = sprintf('t = %.2fs | Angle = %.1f° | Vel = %.1f°/s', ...
+                                 time_tp(frameIdx), angle_tp(frameIdx), vel_tp(frameIdx));
+end
+
+
+
+
+% --- Interactive Phase Plane: Pelvis vs Left Knee (Flexion/Extension) ---
+
+% Extract pelvis and left knee flexion/extension angles
+angle_pk = kneeL_angles_deg(:,1);           % Left knee flex/ext
+vel_pk = kneeL_velocities_deg_s(:,1);       % Left knee angular velocity
+
+% Time vector
+time_pk = (0:length(angle_pk)-1) / fs;
+
+% Initialize figure
+fig_pk = figure('Name','Interactive Phase Plane: Pelvis vs Left Knee','NumberTitle','off');
+ax_pk = axes('Parent', fig_pk);
+plot(ax_pk, angle_pk, vel_pk, 'b.'); % Trajectory
+hold on;
+start_pk = plot(ax_pk, angle_pk(1), vel_pk(1), 'go', 'MarkerSize', 10, 'DisplayName', 'Start');
+end_pk = plot(ax_pk, angle_pk(end), vel_pk(end), 'ro', 'MarkerSize', 10, 'DisplayName', 'End');
+marker_pk = plot(ax_pk, angle_pk(1), vel_pk(1), 'ko', 'MarkerSize', 8, 'MarkerFaceColor','k');
+title(ax_pk, 'Pelvis vs Left Knee Angle-Velocity Phase Plane');
+xlabel(ax_pk, 'Angle (deg)');
+ylabel(ax_pk, 'Velocity (deg/s)');
+legend(ax_pk, 'Trajectory', 'Start', 'End', 'Selected Point');
+grid on;
+
+% Slider
+uicontrol('Style', 'text', 'String', 'Frame:', 'Position', [20, 20, 50, 20]);
+slider_pk = uicontrol('Style', 'slider',...
+    'Min',1,'Max',length(angle_pk),'Value',1,...
+    'Position', [70, 20, 300, 20],...
+    'SliderStep', [1/(length(angle_pk)-1) , 10/(length(angle_pk)-1)]);
+
+% Info Text
+infoText_pk = uicontrol('Style','text', 'Position', [380, 20, 300, 20], ...
+    'String', sprintf('t = %.2fs | Angle = %.1f° | Vel = %.1f°/s', time_pk(1), angle_pk(1), vel_pk(1)));
+
+% Callback function
+slider_pk.Callback = @(src,~) updateMarkerPK(round(src.Value), angle_pk, vel_pk, time_pk, marker_pk, infoText_pk);
+updateMarkerPK(1, angle_pk, vel_pk, time_pk, marker_pk, infoText_pk);
+
+% Callback definition
+function updateMarkerPK(frameIdx, angle_pk, vel_pk, time_pk, marker_pk, infoText_pk)
+    marker_pk.XData = angle_pk(frameIdx);
+    marker_pk.YData = vel_pk(frameIdx);
+    infoText_pk.String = sprintf('t = %.2fs | Angle = %.1f° | Vel = %.1f°/s', ...
+                                 time_pk(frameIdx), angle_pk(frameIdx), vel_pk(frameIdx));
+end
+
+
+
 
 
 
