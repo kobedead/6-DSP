@@ -701,6 +701,51 @@ fprintf('[Pelvis-Knee CRP] t = %.2fs | A/V = %.1f deg | Hilbert = %.1f deg\n', .
 
 
 
+% --- Interactive Phase Plane Visualization: Shoulder vs Elbow (Plane of Elev vs Flexion) ---
+
+% Extract angle and velocity
+angle_s = shoulder_angles_deg(:,1);       % Plane of Elevation
+vel_s = shoulder_velocities_deg_s(:,1);   % Angular velocity
+
+% Time vector
+timeVec = (0:length(angle_s)-1) / fs;
+
+% Initialize figure
+fig = figure('Name','Interactive Phase Plane: Shoulder vs Elbow','NumberTitle','off');
+ax = axes('Parent', fig);
+plot(ax, angle_s, vel_s, 'b.'); % Trajectory
+hold on;
+startPt = plot(ax, angle_s(1), vel_s(1), 'go', 'MarkerSize', 10, 'DisplayName', 'Start');
+endPt = plot(ax, angle_s(end), vel_s(end), 'ro', 'MarkerSize', 10, 'DisplayName', 'End');
+markerPt = plot(ax, angle_s(1), vel_s(1), 'ko', 'MarkerSize', 8, 'MarkerFaceColor','k');
+title(ax, 'Shoulder Angle-Velocity Phase Plane');
+xlabel(ax, 'Angle (deg)');
+ylabel(ax, 'Velocity (deg/s)');
+legend(ax, 'Trajectory', 'Start', 'End', 'Selected Point');
+grid on;
+
+% Slider
+uicontrol('Style', 'text', 'String', 'Frame:', 'Position', [20, 20, 50, 20]);
+slider = uicontrol('Style', 'slider',...
+    'Min',1,'Max',length(angle_s),'Value',1,...
+    'Position', [70, 20, 300, 20],...
+    'SliderStep', [1/(length(angle_s)-1) , 10/(length(angle_s)-1)]);
+
+% Label for info
+infoText = uicontrol('Style','text', 'Position', [380, 20, 250, 20], ...
+    'String', sprintf('t = %.2fs | Angle = %.1f° | Vel = %.1f°/s', timeVec(1), angle_s(1), vel_s(1)));
+
+% Define callback function inline with access to outer variables
+slider.Callback = @(src,~) updateMarker(round(src.Value), angle_s, vel_s, timeVec, markerPt, infoText);
+updateMarker(1, angle_s, vel_s, timeVec, markerPt, infoText);
+
+% Update function (moved outside to work with explicit args)
+function updateMarker(frameIdx, angle_s, vel_s, timeVec, markerPt, infoText)
+    markerPt.XData = angle_s(frameIdx);
+    markerPt.YData = vel_s(frameIdx);
+    infoText.String = sprintf('t = %.2fs | Angle = %.1f° | Vel = %.1f°/s', ...
+                              timeVec(frameIdx), angle_s(frameIdx), vel_s(frameIdx));
+end
 
 
 
