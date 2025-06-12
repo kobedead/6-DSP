@@ -523,23 +523,23 @@ figure('Name', 'Shoulder Kinematics', 'NumberTitle', 'off');
 sgtitle('Shoulder Joint Kinematics');
 
 subplot(3,1,1);
-plot(timeVector, shoulder_angles_deg(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, shoulder_angles_deg(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, shoulder_angles_deg(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, shoulder_angles_deg(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, shoulder_angles_deg(:,2), 'g', 'LineWidth', 1.5);
+plot(t, shoulder_angles_deg(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Shoulder Angles (YXY: Plane of Elev, Elev, Axial Rot)');
 xlabel('Time (s)'); ylabel('Angle (degrees)');
 legend('Plane of Elev', 'Elevation', 'Axial Rot'); grid on;
 
 subplot(3,1,2);
-plot(timeVector, shoulder_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, shoulder_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, shoulder_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, shoulder_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, shoulder_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
+plot(t, shoulder_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Shoulder Angular Velocities'); xlabel('Time (s)'); ylabel('Velocity (deg/s)'); grid on;
 
 subplot(3,1,3);
-plot(timeVector, shoulder_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, shoulder_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, shoulder_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, shoulder_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, shoulder_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
+plot(t, shoulder_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Shoulder Angular Accelerations'); xlabel('Time (s)'); ylabel('Accel (deg/s^2)'); grid on;
 
 % Elbow
@@ -547,22 +547,22 @@ figure('Name', 'Elbow Kinematics', 'NumberTitle', 'off');
 sgtitle('Elbow Joint Kinematics');
 
 subplot(3,1,1);
-plot(timeVector, elbow_angles_deg(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, elbow_angles_deg(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, elbow_angles_deg(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, elbow_angles_deg(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, elbow_angles_deg(:,2), 'g', 'LineWidth', 1.5);
+plot(t, elbow_angles_deg(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Elbow Angles (ZXY: Flex/Ext, Pro/Sup, Varus/Valgus)');
 xlabel('Time (s)'); ylabel('Angle (degrees)'); grid on;
 
 subplot(3,1,2);
-plot(timeVector, elbow_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, elbow_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, elbow_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, elbow_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, elbow_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
+plot(t, elbow_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Elbow Angular Velocities'); xlabel('Time (s)'); ylabel('Velocity (deg/s)'); grid on;
 
 subplot(3,1,3);
-plot(timeVector, elbow_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, elbow_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, elbow_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, elbow_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, elbow_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
+plot(t, elbow_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Elbow Angular Accelerations'); xlabel('Time (s)'); ylabel('Accel (deg/s^2)'); grid on;
 
 % Pelvis
@@ -570,21 +570,21 @@ figure('Name', 'Pelvis Kinematics', 'NumberTitle', 'off');
 sgtitle('Pelvis Kinematics');
 
 subplot(3,1,1);
-plot(timeVector, pelvis_angles_deg(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, pelvis_angles_deg(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, pelvis_angles_deg(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, pelvis_angles_deg(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, pelvis_angles_deg(:,2), 'g', 'LineWidth', 1.5);
+plot(t, pelvis_angles_deg(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Pelvis Angles (ZXY)'); xlabel('Time (s)'); ylabel('Angle (deg)'); grid on;
 
 subplot(3,1,2);
-plot(timeVector, pelvis_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, pelvis_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, pelvis_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, pelvis_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, pelvis_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
+plot(t, pelvis_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Pelvis Angular Velocities'); xlabel('Time (s)'); ylabel('Velocity (deg/s)'); grid on;
 
 subplot(3,1,3);
-plot(timeVector, pelvis_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, pelvis_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, pelvis_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, pelvis_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, pelvis_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
+plot(t, pelvis_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Pelvis Angular Accelerations'); xlabel('Time (s)'); ylabel('Accel (deg/s^2)'); grid on;
 
 % Thorax
@@ -592,21 +592,21 @@ figure('Name', 'Thorax Kinematics', 'NumberTitle', 'off');
 sgtitle('Thorax Kinematics');
 
 subplot(3,1,1);
-plot(timeVector, thorax_angles_deg(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, thorax_angles_deg(:,2), 'b', 'LineWidth', 1.5);
-plot(timeVector, thorax_angles_deg(:,3), 'g', 'LineWidth', 1.5); hold off;
+plot(t, thorax_angles_deg(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, thorax_angles_deg(:,2), 'b', 'LineWidth', 1.5);
+plot(t, thorax_angles_deg(:,3), 'g', 'LineWidth', 1.5); hold off;
 title('Thorax Angles (ZXY)'); xlabel('Time (s)'); ylabel('Angle (deg)'); grid on;
 
 subplot(3,1,2);
-plot(timeVector, thorax_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, thorax_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, thorax_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, thorax_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, thorax_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
+plot(t, thorax_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Thorax Angular Velocities'); xlabel('Time (s)'); ylabel('Velocity (deg/s)'); grid on;
 
 subplot(3,1,3);
-plot(timeVector, thorax_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, thorax_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, thorax_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, thorax_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, thorax_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
+plot(t, thorax_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Thorax Angular Accelerations'); xlabel('Time (s)'); ylabel('Accel (deg/s^2)'); grid on;
 
 % Core
@@ -614,21 +614,21 @@ figure('Name', 'Core Kinematics', 'NumberTitle', 'off');
 sgtitle('Core (Thorax rel. Pelvis) Kinematics');
 
 subplot(3,1,1);
-plot(timeVector, core_angles_deg(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, core_angles_deg(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, core_angles_deg(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, core_angles_deg(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, core_angles_deg(:,2), 'g', 'LineWidth', 1.5);
+plot(t, core_angles_deg(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Core Angles (ZXY)'); xlabel('Time (s)'); ylabel('Angle (deg)'); grid on;
 
 subplot(3,1,2);
-plot(timeVector, core_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, core_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, core_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, core_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, core_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
+plot(t, core_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Core Angular Velocities'); xlabel('Time (s)'); ylabel('Velocity (deg/s)'); grid on;
 
 subplot(3,1,3);
-plot(timeVector, core_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, core_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, core_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, core_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, core_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
+plot(t, core_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Core Angular Accelerations'); xlabel('Time (s)'); ylabel('Accel (deg/s^2)'); grid on;
 
 % Left Knee
@@ -636,28 +636,28 @@ figure('Name', 'Left Knee Kinematics', 'NumberTitle', 'off');
 sgtitle('Left Knee Kinematics');
 
 subplot(3,1,1);
-plot(timeVector, kneeL_angles_deg(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, kneeL_angles_deg(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, kneeL_angles_deg(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, kneeL_angles_deg(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, kneeL_angles_deg(:,2), 'g', 'LineWidth', 1.5);
+plot(t, kneeL_angles_deg(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Left Knee Angles (ZXY)'); xlabel('Time (s)'); ylabel('Angle (deg)'); grid on;
 
 subplot(3,1,2);
-plot(timeVector, kneeL_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, kneeL_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, kneeL_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, kneeL_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, kneeL_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
+plot(t, kneeL_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Left Knee Angular Velocities'); xlabel('Time (s)'); ylabel('Velocity (deg/s)'); grid on;
 
 subplot(3,1,3);
-plot(timeVector, kneeL_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5); hold on;
-plot(timeVector, kneeL_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
-plot(timeVector, kneeL_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5); hold off;
+plot(t, kneeL_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5); hold on;
+plot(t, kneeL_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
+plot(t, kneeL_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5); hold off;
 title('Left Knee Angular Accelerations'); xlabel('Time (s)'); ylabel('Accel (deg/s^2)'); grid on;
 
 
 % --- Plot CRP Comparison: Shoulder vs Elbow ---
 figure('Name', 'CRP: Shoulder vs Elbow', 'NumberTitle', 'off');
-plot(timeVector, crp_shoulder_elbow_av, 'b', 'LineWidth', 1.5); hold on;
-plot(timeVector, crp_shoulder_elbow_deg_norm, 'r--', 'LineWidth', 1.5);
+plot(t, crp_shoulder_elbow_av, 'b', 'LineWidth', 1.5); hold on;
+plot(t, crp_shoulder_elbow_deg_norm, 'r--', 'LineWidth', 1.5);
 legend('Angle-Velocity CRP', 'Hilbert CRP');
 title('CRP: Shoulder (Plane of Elevation) vs Elbow (Flexion)');
 xlabel('Time (s)');
@@ -680,9 +680,9 @@ xlabel('Time (s)'); ylabel('CRP (degrees)');
 ylim([-180 180]); yticks(-180:60:180);
 grid on;
 
-% --- Output sample CRP value for Thorax–Pelvis at frame_sample
+% --- Output sample CRP value for Thorax–Pelvis at sample_frame
 fprintf('[Thorax-Pelvis CRP] t = %.2fs | A/V = %.1f deg | Hilbert = %.1f deg\n', ...
-    t(frame_sample), crp_core_av(frame_sample), crp_core_hilbert(frame_sample));
+    t(sample_frame), crp_core_av(sample_frame), crp_core_hilbert(sample_frame));
 
 
 % Plot Comparision: CPR Pelvis and Knee
@@ -697,7 +697,7 @@ grid on;
 
 % Sample print
 fprintf('[Pelvis-Knee CRP] t = %.2fs | A/V = %.1f deg | Hilbert = %.1f deg\n', ...
-    t_crp_pelvis_knee(frame_sample), crp_pk_av(frame_sample), crp_pk_hilbert(frame_sample));
+    t_crp_pelvis_knee(sample_frame), crp_pk_av(sample_frame), crp_pk_hilbert(sample_frame));
 
 
 
