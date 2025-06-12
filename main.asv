@@ -63,7 +63,6 @@ all_missing_data = struct();
 avg_jump = calculateAverageJumpSize(T_filt);
 disp(['Average jump size in the data: ' num2str(avg_jump)]);
 
-% Now you can use avg_jump to set your allowed_jump_threshold
 allowed_jump_threshold = avg_jump * 5 * upsampling_factor;  % Tweak this parameter
 disp(['Jump threshold set to: ' num2str(allowed_jump_threshold)]);
 
@@ -71,11 +70,13 @@ disp(['Jump threshold set to: ' num2str(allowed_jump_threshold)]);
 % LOOP THROUGH FRAMES 
 for i = 1:nRows
     % Extract all necessary markers for this frame
+  
     AR = [T_filt.ARX(i), T_filt.ARY(i), T_filt.ARZ(i)];
     ELR = [T_filt.ELRX(i), T_filt.ELRY(i), T_filt.ELRZ(i)];
     EMR = [T_filt.EMRX(i), T_filt.EMRY(i), T_filt.EMRZ(i)]; 
     PLR = [T_filt.PLRX(i), T_filt.PLRY(i), T_filt.PLRZ(i)];
     PMR = [T_filt.PMRX(i), T_filt.PMRY(i), T_filt.PMRZ(i)];
+
     MS = [T_filt.MSX(i), T_filt.MSY(i), T_filt.MSZ(i)];
     PX = [T_filt.PXX(i), T_filt.PXY(i), T_filt.PXZ(i)];
     C7 = [T_filt.C7X(i), T_filt.C7Y(i), T_filt.C7Z(i)];
@@ -108,6 +109,17 @@ for i = 1:nRows
     end
 
 
+    CLL = [T_filt.CLLX(i), T_filt.CLLY(i), T_filt.CLLZ(i)];
+    CML = [T_filt.CMLX(i), T_filt.CMLY(i), T_filt.CMLZ(i)];
+    CLR = [T_filt.CLRX(i), T_filt.CLRY(i), T_filt.CLRZ(i)];
+    CMR = [T_filt.CMRX(i), T_filt.CMRY(i), T_filt.CMRZ(i)];
+    MLL = [T_filt.MLLX(i), T_filt.MLLY(i), T_filt.MLLZ(i)];
+    MML = [T_filt.MMLX(i), T_filt.MMLY(i), T_filt.MMLZ(i)];
+    MLR = [T_filt.MLRX(i), T_filt.MLRY(i), T_filt.MLRZ(i)];
+    MMR = [T_filt.MMRX(i), T_filt.MMRY(i), T_filt.MMRZ(i)];
+
+
+
     %                       --- Calculate Upper Arm (U) ---
     Mid_ELR_EMR = (ELR + EMR) / 2;
     % Define Y_h2: from the midpoint (elbow) to the shoulder (AR)
@@ -138,7 +150,6 @@ for i = 1:nRows
     Z_f = cross(X_f, Y_f);
     Z_f = Z_f / norm(Z_f);
     F_forearm(:,:,i) = [X_f(:), Y_f(:), Z_f(:)];
-
 
     %                    --- Calculate Thorax (T) ---
 
@@ -215,14 +226,17 @@ for i = 1:nRows
 
 
     % --- Calculate Left Shank (SL) --- (Example - Adapt based on ISB/Wu)
+    % Assuming MLL = Malleolus Lateralis Left, MML = Malleolus Medialis Left
     Mid_Ankle_L = (MLL + MML) / 2;
-    Mid_Knee_L  = (CLL + CML) / 2;
-    % Define coordinate system for left shank (SL)
-    Y_sl = Mid_Knee_L - Mid_Ankle_L; Y_sl = Y_sl / norm(Y_sl);  % Proximal
-    temp_Z = MLL - MML;  % Vector pointing medial
-    X_sl = cross(Y_sl, temp_Z); X_sl = X_sl / norm(X_sl);       % Anterior
-    Z_sl = cross(X_sl, Y_sl); Z_sl = Z_sl / norm(Z_sl);         % Lateral
+    Mid_Knee_L = (CLL + CML) / 2; % Needs CML/CLL markers from above
+    Y_sl = Mid_Knee_L - Mid_Ankle_L; Y_sl = Y_sl / norm(Y_sl); % Points proximally
+    temp_Z = MLL - MML; % Vector points medially
+    X_sl = cross(Y_sl, temp_Z); X_sl = X_sl / norm(X_sl); % Points anteriorly
+    Z_sl = cross(X_sl, Y_sl); Z_sl = Z_sl / norm(Z_sl); % Points Left (Lateral)
     SL_shankL(:,:,i) = [X_sl(:), Y_sl(:), Z_sl(:)];
+
+
+
 
 
 
@@ -260,7 +274,7 @@ for i = 1:nRows
     % Elbow (Humerus -> Forearm) - ISB: Z(Hum)-Y(Forearm)-Floating X -> 'ZYX' common
     % Rotation order: Flex/Ext (Z), Varus/Valgus (Y'), Pro/Sup (X'') - Check ISB elbow details
     % Wu Part II Sec 3.5 seems different: e1=Zhum(Flex/Ext), e3=Yforearm(Pro/Sup) -> ZYX common interpretation
-    elbow_angles = rotm2eul(R_rel_FU(:,:,i), 'ZXY');
+    elbow_angles = rotm2eul(R_rel_FU(:,:,i), 'ZYX');
     elbow_angles_deg(i,:) = rad2deg(elbow_angles);
 
     % Core (Pelvis -> Thorax) - ISB Spine: Z(Prox)-Y(Dist)-Floating X -> 'ZXY' interpretation
@@ -334,6 +348,177 @@ if isempty(invalidFrames)
 else
     disp('Some rotation matrices failed validation. See messages above.');
 end
+
+
+
+
+% --- 6. CALCULATE ROTATIONAL VELOCITIES AND ACCELERATIONS ---
+% Using numerical differentiation (gradient function is suitable for unevenly spaced data, but time is even here)
+% Or use diff and divide by dt. For centered difference, adjust indexing.
+dt = 1/fs; % Time step
+
+% Angular Velocities (degrees/s)
+pelvis_velocities_deg_s = diff(pelvis_angles_deg, 1, 1) / dt;
+thorax_velocities_deg_s = diff(thorax_angles_deg, 1, 1) / dt;
+shoulder_velocities_deg_s = diff(shoulder_angles_deg, 1, 1) / dt;
+elbow_velocities_deg_s = diff(elbow_angles_deg, 1, 1) / dt;
+core_velocities_deg_s = diff(core_angles_deg, 1, 1) / dt;
+% kneeL_velocities_deg_s = diff(kneeL_angles_deg, 1, 1) / dt; % Uncomment
+
+% Append a NaN row or repeat last value to match original time vector length for plotting
+pelvis_velocities_deg_s = [pelvis_velocities_deg_s; nan(1,3)];
+thorax_velocities_deg_s = [thorax_velocities_deg_s; nan(1,3)];
+shoulder_velocities_deg_s = [shoulder_velocities_deg_s; nan(1,3)];
+elbow_velocities_deg_s = [elbow_velocities_deg_s; nan(1,3)];
+core_velocities_deg_s = [core_velocities_deg_s; nan(1,3)];
+% kneeL_velocities_deg_s = [kneeL_velocities_deg_s; nan(1,3)]; % Uncomment
+
+% Angular Accelerations (degrees/s^2)
+% Differentiate velocities. Apply a filter to velocities before differentiation if noisy.
+pelvis_accelerations_deg_s2 = diff(pelvis_velocities_deg_s(1:end-1,:), 1, 1) / dt; % Exclude the NaN row for diff
+thorax_accelerations_deg_s2 = diff(thorax_velocities_deg_s(1:end-1,:), 1, 1) / dt;
+shoulder_accelerations_deg_s2 = diff(shoulder_velocities_deg_s(1:end-1,:), 1, 1) / dt;
+elbow_accelerations_deg_s2 = diff(elbow_velocities_deg_s(1:end-1,:), 1, 1) / dt;
+core_accelerations_deg_s2 = diff(core_velocities_deg_s(1:end-1,:), 1, 1) / dt;
+% kneeL_accelerations_deg_s2 = diff(kneeL_velocities_deg_s(1:end-1,:), 1, 1) / dt; % Uncomment
+
+% Append two NaN rows or repeat last values to match original time vector length for plotting
+pelvis_accelerations_deg_s2 = [pelvis_accelerations_deg_s2; nan(2,3)];
+thorax_accelerations_deg_s2 = [thorax_accelerations_deg_s2; nan(2,3)];
+shoulder_accelerations_deg_s2 = [shoulder_accelerations_deg_s2; nan(2,3)];
+elbow_accelerations_deg_s2 = [elbow_accelerations_deg_s2; nan(2,3)];
+core_accelerations_deg_s2 = [core_accelerations_deg_s2; nan(2,3)];
+% kneeL_accelerations_deg_s2 = [kneeL_accelerations_deg_s2; nan(2,3)]; % Uncomment
+
+% --- 7. CALCULATE CONTINUOUS RELATIVE PHASE (CRP) ---
+% CRP is calculated between two oscillating signals.
+% Example: CRP between shoulder flexion/extension and elbow flexion/extension
+% Requires selection of specific angle components.
+% Shoulder Angle 1 (Plane of Elev) vs Elbow Angle 1 (Flex/Ext)
+
+% Ensure signals are zero-mean or appropriately detrended if necessary for Hilbert transform
+signal1_angle = shoulder_angles_deg(:,1); % Example: Shoulder Plane of Elevation
+signal2_angle = elbow_angles_deg(:,1);   % Example: Elbow Flexion/Extension
+
+% Optional: Filter angles again if CRP is noisy (use a bandpass if a specific frequency range is expected)
+% [b_crp, a_crp] = butter(2, [0.5 5]/(fs/2), 'bandpass'); % Example: 0.5-5 Hz activity
+% signal1_angle_filt = filtfilt(b_crp, a_crp, signal1_angle);
+% signal2_angle_filt = filtfilt(b_crp, a_crp, signal2_angle);
+
+% Calculate phase using Hilbert transform
+phase_signal1 = angle(hilbert(detrend(signal1_angle))); % Phase in radians
+phase_signal2 = angle(hilbert(detrend(signal2_angle))); % Phase in radians
+
+% Calculate CRP
+crp_shoulder_elbow_rad = phase_signal1 - phase_signal2;
+
+% Unwrap CRP to avoid jumps (optional, depends on interpretation)
+% crp_shoulder_elbow_rad_unwrapped = unwrap(crp_shoulder_elbow_rad);
+
+% Convert CRP to degrees if preferred
+crp_shoulder_elbow_deg = rad2deg(crp_shoulder_elbow_rad);
+
+% Normalize CRP to be between -180 and 180 or 0 and 360
+crp_shoulder_elbow_deg_norm = mod(crp_shoulder_elbow_deg + 180, 360) - 180;
+
+
+% --- 8. VISUALIZATION ---
+% Plot Euler/Cardan angles, velocities, and accelerations for each segment/joint
+% Example for Shoulder joint
+
+
+% Shoulder Angles
+figure('Name', 'Shoulder Kinematics', 'NumberTitle', 'off', 'WindowState', 'maximized');
+sgtitle('Shoulder Joint Kinematics'); % Super title for the figure
+
+timeVector = 1 : 1  : nRows;
+
+
+subplot(3,1,1);
+plot(timeVector, shoulder_angles_deg(:,1));
+hold on;
+plot(timeVector, shoulder_angles_deg(:,2));
+plot(timeVector, shoulder_angles_deg(:,3));
+hold off;
+title('Shoulder Angles (YXY: Plane of Elev, Elev, Axial Rot)');
+xlabel('Time (s)');
+ylabel('Angle (degrees)');
+legend('Plane of Elev (Y)', 'Elevation (X'')', 'Axial Rot (Y'''')', 'Location', 'best');
+grid on;
+
+% Shoulder Velocities
+subplot(3,1,2);
+plot(timeVector, shoulder_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5);
+hold on;
+plot(timeVector, shoulder_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
+plot(timeVector, shoulder_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5);
+hold off;
+title('Shoulder Angular Velocities');
+xlabel('Time (s)');
+ylabel('Velocity (degrees/s)');
+legend('Vel Plane of Elev', 'Vel Elevation', 'Vel Axial Rot', 'Location', 'best');
+grid on;
+
+% Shoulder Accelerations
+subplot(3,1,3);
+plot(timeVector, shoulder_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5);
+hold on;
+plot(timeVector, shoulder_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
+plot(timeVector, shoulder_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5);
+hold off;
+title('Shoulder Angular Accelerations');
+xlabel('Time (s)');
+ylabel('Acceleration (degrees/s^2)');
+legend('Acc Plane of Elev', 'Acc Elevation', 'Acc Axial Rot', 'Location', 'best');
+grid on;
+
+
+% Example for Elbow joint (similar structure)
+figure('Name', 'Elbow Kinematics', 'NumberTitle', 'off', 'WindowState', 'maximized');
+sgtitle('Elbow Joint Kinematics');
+
+subplot(3,1,1);
+    plot(timeVector, elbow_angles_deg(:,1), 'r', 'LineWidth', 1.5); hold on;
+    plot(timeVector, elbow_angles_deg(:,2), 'g', 'LineWidth', 1.5);
+    plot(timeVector, elbow_angles_deg(:,3), 'b', 'LineWidth', 1.5); hold off;
+    legend('Flex/Ext (Z)', 'Pro/Sup (X'')', 'Varus/Valgus (Y'''')', 'Location','best');
+
+title('Elbow Angles (ZXY: Flex/Ext, Pro/Sup, Varus/Valgus)');
+xlabel('Time (s)'); ylabel('Angle (degrees)');
+grid on;
+
+% Subplot 2: Elbow Velocities
+subplot(3,1,2);
+    plot(timeVector, elbow_velocities_deg_s(:,1), 'r', 'LineWidth', 1.5); hold on;
+    plot(timeVector, elbow_velocities_deg_s(:,2), 'g', 'LineWidth', 1.5);
+    plot(timeVector, elbow_velocities_deg_s(:,3), 'b', 'LineWidth', 1.5); hold off;
+    legend('Vel Flex/Ext', 'Vel Pro/Sup', 'Vel Varus/Valgus', 'Location','best');
+title('Elbow Angular Velocities');
+xlabel('Time (s)'); ylabel('Velocity (degrees/s)');
+grid on;
+
+% Subplot 3: Elbow Accelerations
+subplot(3,1,3);
+    plot(timeVector, elbow_accelerations_deg_s2(:,1), 'r', 'LineWidth', 1.5); hold on;
+    plot(timeVector, elbow_accelerations_deg_s2(:,2), 'g', 'LineWidth', 1.5);
+    plot(timeVector, elbow_accelerations_deg_s2(:,3), 'b', 'LineWidth', 1.5); hold off;
+    legend('Acc Flex/Ext', 'Acc Pro/Sup', 'Acc Varus/Valgus', 'Location','best');
+
+title('Elbow Angular Accelerations');
+xlabel('Time (s)'); ylabel('Acceleration (degrees/s^2)');
+grid on;
+
+% Plot CRP
+figure('Name', 'Continuous Relative Phase (CRP)', 'NumberTitle', 'off', 'WindowState', 'maximized');
+    plot(timeVector, crp_shoulder_elbow_deg_norm, 'm', 'LineWidth', 1.5);
+    ylim([-180 180]); 
+    yticks(-180:60:180);
+title('CRP: Shoulder (Plane of Elev) vs Elbow (Flex/Ext)');
+xlabel('Time (s)');
+ylabel('CRP (degrees)');
+grid on;
+
+
 
 
 
